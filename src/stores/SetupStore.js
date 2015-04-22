@@ -3,14 +3,14 @@ var _ = require('underscore');
 var path = require('path');
 var fs = require('fs');
 var Promise = require('bluebird');
-var machine = require('./DockerMachine');
-var virtualBox = require('./VirtualBox');
-var setupUtil = require('./SetupUtil');
-var util = require('./Util');
+var machine = require('../utils/DockerMachineUtil');
+var virtualBox = require('../utils/VirtualBoxUtil');
+var setupUtil = require('../utils/SetupUtil');
+var util = require('../utils/Util');
 var assign = require('object-assign');
-var metrics = require('./Metrics');
+var metrics = require('../utils/MetricsUtil');
 var bugsnag = require('bugsnag-js');
-var docker = require('./Docker');
+var docker = require('../utils/DockerUtil');
 
 var _currentStep = null;
 var _error = null;
@@ -231,15 +231,14 @@ var SetupStore = assign(Object.create(EventEmitter.prototype), {
         metrics.track('Setup Finished');
         break;
       } catch (err) {
+        err.message = util.removeSensitiveData(err.message);
         metrics.track('Setup Failed', {
           step: _currentStep,
-          message: err.message
         });
         bugsnag.notify('SetupError', err.message, {
           error: err,
           output: err.message
         }, 'info');
-        err.message = util.removeSensitiveData(err.message);
         _error = err;
         this.emit(this.ERROR_EVENT);
         yield this.pause();
