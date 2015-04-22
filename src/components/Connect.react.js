@@ -2,7 +2,7 @@ var React = require('react/addons');
 var Router = require('react-router');
 var RetinaImage = require('react-retina-image');
 var Header = require('./Header.react');
-var metrics = require('./Metrics');
+var metrics = require('../utils/MetricsUtil');
 
 var Connect = React.createClass({
   mixins: [ Router.Navigation ],
