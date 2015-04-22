@@ -59,6 +59,12 @@
         font-size: 18px;
         margin-bottom: 20px;
         width: 340px;
+        &.error {
+          border-bottom: 1px solid @brand-negative;
+          &:focus {
+            border-bottom: 1px solid @brand-negative;
+          }
+        }
         &:focus {
           outline: 0;
           border-bottom: 1px solid @brand-action;
@@ -98,6 +104,14 @@
         position: relative;
         top: -15px;
         left: 5px;
+      }
+      .error-message {
+        font-size: 10px;
+        position: relative;
+        top: -15px;
+        left: 5px;
+        color: @brand-negative;
+        display: none;
       }
     }
 
