@@ -58,16 +58,55 @@
         transition: all 0.25s;
         font-size: 18px;
         margin-bottom: 20px;
+        width: 340px;
         &:focus {
           outline: 0;
           border-bottom: 1px solid @brand-action;
         }
         &::-webkit-input-placeholder {
-          color: #C7D7D7;
+          color: @gray-lightest;
+          font-weight: 400;
         }
+      }
+      button[type="submit"] {
+        font-size: 18px;
+        padding: 2px 24px 5px 24px;
+        height: 46px;
+        color: white;
+        background-color: @brand-action;
+        border: 0;
+        margin-top: 20px;
+        &:hover {
+          background-color: darken(@brand-action, 5%);
+        }
+      }
+      .extra {
+        position: relative;
+        top: 10px;
+        font-size: 13px;
+        margin-left: 15px;
+        color: @gray-lightest;
+        .btn {
+          margin-left: 6px;
+          position: relative;
+          top: -3px;
+        }
+      }
+      .link {
+        display: block;
+        font-size: 10px;
+        position: relative;
+        top: -15px;
+        left: 5px;
       }
     }
 
+  }
+
+  .btn-skip {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
   }
 
   .desc {
