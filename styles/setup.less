@@ -31,6 +31,45 @@
     }
   }
 
+  .form-section {
+    display: flex;
+    width: 50%;
+    flex: 0 auto;
+    align-items: center;
+    justify-content: center;
+    padding-right: 60px;
+    padding-left: 80px;
+    flex-direction: column;
+
+    img {
+      width: 323px;
+      height: 64px;
+    }
+
+    form {
+      margin-top: 40px;
+      input[type="text"], input[type="password"] {
+        display: block;
+        border: 0;
+        border-bottom: 1px solid @gray-lightest;
+        color: @gray-normal;
+        font-weight: 300;
+        padding: 10px 5px;
+        transition: all 0.25s;
+        font-size: 18px;
+        margin-bottom: 20px;
+        &:focus {
+          outline: 0;
+          border-bottom: 1px solid @brand-action;
+        }
+        &::-webkit-input-placeholder {
+          color: #C7D7D7;
+        }
+      }
+    }
+
+  }
+
   .desc {
     display: flex;
     width: 50%;

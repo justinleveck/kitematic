@@ -10,8 +10,6 @@ var metrics = require('./Metrics');
 var autoUpdater = remote.require('auto-updater');
 var RetinaImage = require('react-retina-image');
 var machine = require('./DockerMachine');
-var OverlayTrigger = require('react-bootstrap').OverlayTrigger;
-var Tooltip = require('react-bootstrap').Tooltip;
 var util = require('./Util');
 
 var Containers = React.createClass({
@@ -122,6 +120,12 @@ var Containers = React.createClass({
     });
     util.exec(['open', 'https://github.com/kitematic/kitematic/issues/new']);
   },
+  handleClickConnectToHub: function () {
+    metrics.track('Opened Connect to Hub', {
+      from: 'app'
+    });
+    this.context.router.transitionTo('connect');
+  },
   handleMouseEnterDockerTerminal: function () {
     this.setState({
       currentButtonLabel: 'Open terminal to use Docker command line.'
@@ -183,7 +187,7 @@ var Containers = React.createClass({
                 <span className="btn-sidebar" onClick={this.handleClickDockerTerminal} onMouseEnter={this.handleMouseEnterDockerTerminal} onMouseLeave={this.handleMouseLeaveDockerTerminal}><RetinaImage src="docker-terminal.png"/></span>
                 <span className="btn-sidebar" onClick={this.handleClickReportIssue} onMouseEnter={this.handleMouseEnterReportIssue} onMouseLeave={this.handleMouseLeaveReportIssue}><RetinaImage src="report-issue.png"/></span>
                 <span className="btn-sidebar" onClick={this.handleClickPreferences} onMouseEnter={this.handleMouseEnterPreferences} onMouseLeave={this.handleMouseLeavePreferences}><RetinaImage src="preferences.png"/></span>
-                {updateWidget}
+                <a className="btn btn-action small" onClick={this.handleClickConnectToHub}>Connect to Hub</a>
               </div>
               <div className="sidebar-buttons-padding"></div>
             </section>

@@ -9,6 +9,7 @@ var ContainerSettingsGeneral = require('./ContainerSettingsGeneral.react');
 var ContainerSettingsPorts = require('./ContainerSettingsPorts.react');
 var ContainerSettingsVolumes = require('./ContainerSettingsVolumes.react');
 var Preferences = require('./Preferences.react');
+var Connect = require('./Connect.react');
 var NewContainer = require('./NewContainer.react');
 var Router = require('react-router');
 
@@ -39,6 +40,7 @@ var routes = (
       <Route name="preferences" path="/preferences" handler={Preferences}/>
       <DefaultRoute name="new" handler={NewContainer}/>
     </Route>
+    <Route name="connect" path="/connect" handler={Connect}/>
     <DefaultRoute name="setup" handler={Setup}/>
   </Route>
 );
