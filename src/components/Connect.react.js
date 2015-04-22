@@ -1,5 +1,4 @@
 var $ = require('jquery');
-var _ = require('underscore');
 var React = require('react/addons');
 var Router = require('react-router');
 var RetinaImage = require('react-retina-image');
@@ -46,12 +45,20 @@ var Connect = React.createClass({
     this.context.router.transitionTo('containers');
   },
   handleGoToLogin: function () {
+    var $form = $('.form-connect');
+    clearFormErrors($form);
+    $form.find('input[name="password"]').val('');
+    $form.find('input[name="email"]').val('');
     metrics.track('Clicked Go to Login', {
       from: 'app'
     });
     this.setState({page: 'login'});
   },
   handleGoToSignUp: function () {
+    var $form = $('.form-connect');
+    clearFormErrors($form);
+    $form.find('input[name="password"]').val('');
+    $form.find('input[name="email"]').val('');
     metrics.track('Clicked Go to Sign Up', {
       from: 'app'
     });
@@ -65,7 +72,7 @@ var Connect = React.createClass({
   },
   handleSubmitSignUpForm: function (e) {
     e.preventDefault();
-    var $form = $('.form-signup');
+    var $form = $('.form-connect');
     var data = $form.serialize();
     clearFormErrors($form);
     $.ajax({
@@ -82,11 +89,30 @@ var Connect = React.createClass({
       }
     });
   },
+  handleSubmitLoginForm: function (e) {
+    e.preventDefault();
+    var $form = $('.form-connect');
+    var data = $form.serialize();
+    clearFormErrors($form);
+    $.ajax({
+      data: data,
+      type: 'POST',
+      url: 'https://hub.dev.docker.com/v2/users/login/',
+      success: function (response) {
+        console.log(response);
+      },
+      error: function (response) {
+        var errors = response.responseJSON;
+        console.log(errors);
+        showFormErrors($form, errors);
+      }
+    });
+  },
   render: function () {
     var userForm;
     if (this.state.page === 'signup') {
       userForm = (
-        <form className="form-signup" method="post" onSubmit={this.handleSubmitSignUpForm}>
+        <form className="form-connect" method="post" onSubmit={this.handleSubmitSignUpForm}>
           <input ref="usernameInput" maxLength="30" name="username" placeholder="Username" type="text"/>
           <p className="error-message">Error message.</p>
           <input ref="emailInput" name="email" placeholder="E-mail" type="text"/>
@@ -99,7 +125,7 @@ var Connect = React.createClass({
       );
     } else {
       userForm = (
-        <form className="form-login" method="post">
+        <form className="form-connect" method="post" onSubmit={this.handleSubmitLoginForm}>
           <input ref="usernameInput" name="username" placeholder="Username" type="text"/>
           <p className="error-message">Error message.</p>
           <input ref="passwordInput" name="password" placeholder="Password" type="password"/>
