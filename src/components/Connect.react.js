@@ -73,6 +73,27 @@ var validateSignUpForm = function ($form) {
   return errors;
 };
 
+var validateLoginForm = function ($form) {
+  var errors = {};
+  var usernameErrors = [];
+  var passwordErrors = [];
+  var username = $form.find('input[name="username"]').val().trim();
+  var password = $form.find('input[name="password"]').val();
+  if (validate.isBlank(username)) {
+    usernameErrors.push('Username cannot be blank.');
+  }
+  if (validate.isBlank(password)) {
+    passwordErrors.push('Password cannot be blank.');
+  }
+  if (usernameErrors.length > 0) {
+    errors.username = usernameErrors;
+  }
+  if (passwordErrors.length > 0) {
+    errors.password = passwordErrors;
+  }
+  return errors;
+};
+
 var Connect = React.createClass({
   mixins: [ Router.Navigation ],
   getInitialState: function () {
@@ -82,13 +103,18 @@ var Connect = React.createClass({
   },
   componentDidMount: function () {
     this.refs.usernameInput.getDOMNode().focus();
+    $(document.body).on('keydown', this.handleKeyDown);
   },
   componentDidUpdate: function () {
     this.refs.usernameInput.getDOMNode().focus();
   },
+  componentWillUnMount: function() {
+    $(document.body).off('keydown', this.handleKeyDown);
+  },
   handleSkip: function () {
     metrics.track('Skipped Connect to Hub', {
-      from: 'app'
+      from: 'app',
+      action: 'click'
     });
     this.context.router.transitionTo('containers');
   },
@@ -148,19 +174,34 @@ var Connect = React.createClass({
     var $form = $('.form-connect');
     var data = $form.serialize();
     clearFormErrors($form);
-    $.ajax({
-      data: data,
-      type: 'POST',
-      url: 'https://hub.dev.docker.com/v2/users/login/',
-      success: function (response) {
-        console.log(response);
-      },
-      error: function (response) {
-        var errors = response.responseJSON;
-        console.log(errors);
-        showFormErrors($form, errors);
-      }
-    });
+    var formErrors = validateLoginForm($form);
+    if ($.isEmptyObject(formErrors)) {
+      $.ajax({
+        data: data,
+        type: 'POST',
+        url: 'https://hub.dev.docker.com/v2/users/login/',
+        success: function (response) {
+          console.log(response);
+        },
+        error: function (response) {
+          var errors = response.responseJSON;
+          console.log(errors);
+          showFormErrors($form, errors);
+        }
+      });
+    } else {
+      showFormErrors($form, formErrors);
+    }
+  },
+  handleKeyDown: function(e) {
+    var ESC = 27;
+    if (e.keyCode === ESC) {
+      metrics.track('Skipped Connect to Hub', {
+        from: 'app',
+        action: 'esc'
+      });
+      this.context.router.transitionTo('containers');
+    }
   },
   render: function () {
     var userForm;
@@ -202,7 +243,7 @@ var Connect = React.createClass({
             <h4>Step 5 out of 5</h4>
             <h1>Connect to Docker Hub</h1>
             <p>Sign up or login to the Docker Hub to create your own or your team’s private containers.</p>
-            <a className="btn btn-action btn-skip" onClick={this.handleSkip}>Skip</a>
+            <a className="btn-skip" onClick={this.handleSkip}>Skip</a>
           </div>
         </div>
       </div>
