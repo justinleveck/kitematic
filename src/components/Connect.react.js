@@ -10,13 +10,22 @@ var validate = require('../utils/ValidationUtil');
 var showFormErrors = function ($form, errors) {
   for (var name in errors) {
     if (errors.hasOwnProperty(name)) {
-      var fieldError = errors[name][0];
-      var queryName = 'input[name="' + name + '"]';
-      var $field = $form.find(queryName);
-      $field.addClass('error');
-      var $errMsg = $field.next();
-      $errMsg.html(fieldError);
-      $errMsg.show();
+      var fieldError;
+      var $errMsg;
+      if (name === 'detail') {
+        fieldError = errors[name];
+        $errMsg = $form.find('div.error');
+        $errMsg.html(fieldError);
+        $errMsg.show();
+      } else {
+        fieldError = errors[name][0];
+        var queryName = 'input[name="' + name + '"]';
+        var $field = $form.find(queryName);
+        $field.addClass('error');
+        $errMsg = $field.next();
+        $errMsg.html(fieldError);
+        $errMsg.show();
+      }
     }
   }
 };
@@ -24,6 +33,7 @@ var showFormErrors = function ($form, errors) {
 var clearFormErrors = function ($form) {
   $form.find('input').removeClass('error');
   $form.find('.error-message').hide();
+  $form.find('div.error').hide();
 };
 
 var validateSignUpForm = function ($form) {
@@ -147,19 +157,23 @@ var Connect = React.createClass({
   handleSubmitSignUpForm: function (e) {
     e.preventDefault();
     var $form = $('.form-connect');
+    var $btn = $form.find('button[type="submit"]');
     var data = $form.serialize();
     data += '&subscribe=on';
     clearFormErrors($form);
     var formErrors = validateSignUpForm($form);
     if ($.isEmptyObject(formErrors)) {
+      $btn.prop("disabled", true);
       $.ajax({
         data: data,
         type: 'POST',
         url: 'https://hub.dev.docker.com/v2/users/easy_signup/',
         success: function (response) {
+          $btn.prop("disabled", false);
           console.log(response);
         },
         error: function (response) {
+          $btn.prop("disabled", false);
           var errors = response.responseJSON;
           console.log(errors);
           showFormErrors($form, errors);
@@ -172,18 +186,22 @@ var Connect = React.createClass({
   handleSubmitLoginForm: function (e) {
     e.preventDefault();
     var $form = $('.form-connect');
+    var $btn = $form.find('button[type="submit"]');
     var data = $form.serialize();
     clearFormErrors($form);
     var formErrors = validateLoginForm($form);
     if ($.isEmptyObject(formErrors)) {
+      $btn.prop("disabled", true);
       $.ajax({
         data: data,
         type: 'POST',
         url: 'https://hub.dev.docker.com/v2/users/login/',
         success: function (response) {
+          $btn.prop("disabled", false);
           console.log(response);
         },
         error: function (response) {
+          $btn.prop("disabled", false);
           var errors = response.responseJSON;
           console.log(errors);
           showFormErrors($form, errors);
@@ -193,7 +211,7 @@ var Connect = React.createClass({
       showFormErrors($form, formErrors);
     }
   },
-  handleKeyDown: function(e) {
+  handleKeyDown: function (e) {
     var ESC = 27;
     if (e.keyCode === ESC) {
       metrics.track('Skipped Connect to Hub', {
@@ -226,6 +244,7 @@ var Connect = React.createClass({
           <input ref="passwordInput" name="password" placeholder="Password" type="password"/>
           <p className="error-message">Error message.</p>
           <a className="link" onClick={this.handleForgotPassword}>Forgot your password?</a>
+          <div className="error">Error message.</div>
           <button className="btn btn-action" type="submit">Login</button>
           <span className="extra">Don&#39;t have an account yet? <a className="btn btn-action" onClick={this.handleGoToSignUp}>Sign Up</a></span>
         </form>
