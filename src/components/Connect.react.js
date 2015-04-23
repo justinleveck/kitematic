@@ -5,6 +5,7 @@ var RetinaImage = require('react-retina-image');
 var Header = require('./Header.react');
 var metrics = require('../utils/MetricsUtil');
 var util = require('../utils/Util');
+var validate = require('../utils/ValidationUtil');
 
 var showFormErrors = function ($form, errors) {
   for (var name in errors) {
@@ -23,6 +24,53 @@ var showFormErrors = function ($form, errors) {
 var clearFormErrors = function ($form) {
   $form.find('input').removeClass('error');
   $form.find('.error-message').hide();
+};
+
+var validateSignUpForm = function ($form) {
+  var errors = {};
+  var usernameErrors = [];
+  var emailErrors = [];
+  var passwordErrors = [];
+  var username = $form.find('input[name="username"]').val().trim();
+  var email = $form.find('input[name="email"]').val().trim();
+  var password = $form.find('input[name="password"]').val();
+  if (validate.isBlank(username)) {
+    usernameErrors.push('Username cannot be blank.');
+  } else {
+    if (username.length < 4) {
+      usernameErrors.push('Username must be more than 3 characters.');
+    }
+    if (username.length > 30) {
+      usernameErrors.push('Username must be less than 30 characters.');
+    }
+    if (!validate.isValidUsername(username)) {
+      usernameErrors.push('Username must be lowercase letters and numbers.');
+    }
+  }
+  if (validate.isBlank(email)) {
+    emailErrors.push('E-mail address cannot be blank.');
+  } else {
+    if (!validate.isValidEmail(email)) {
+      emailErrors.push('Please enter a valid e-mail address.');
+    }
+  }
+  if (validate.isBlank(password)) {
+    passwordErrors.push('Password cannot be blank.');
+  } else {
+    if (password.length < 5) {
+      passwordErrors.push('For your security, your password has to be more than 5 characters.');
+    }
+  }
+  if (usernameErrors.length > 0) {
+    errors.username = usernameErrors;
+  }
+  if (emailErrors.length > 0) {
+    errors.email = emailErrors;
+  }
+  if (passwordErrors.length > 0) {
+    errors.password = passwordErrors;
+  }
+  return errors;
 };
 
 var Connect = React.createClass({
@@ -74,20 +122,26 @@ var Connect = React.createClass({
     e.preventDefault();
     var $form = $('.form-connect');
     var data = $form.serialize();
+    data += '&subscribe=on';
     clearFormErrors($form);
-    $.ajax({
-      data: data,
-      type: 'POST',
-      url: 'https://hub.dev.docker.com/v2/users/easy_signup/',
-      success: function (response) {
-        console.log(response);
-      },
-      error: function (response) {
-        var errors = response.responseJSON;
-        console.log(errors);
-        showFormErrors($form, errors);
-      }
-    });
+    var formErrors = validateSignUpForm($form);
+    if ($.isEmptyObject(formErrors)) {
+      $.ajax({
+        data: data,
+        type: 'POST',
+        url: 'https://hub.dev.docker.com/v2/users/easy_signup/',
+        success: function (response) {
+          console.log(response);
+        },
+        error: function (response) {
+          var errors = response.responseJSON;
+          console.log(errors);
+          showFormErrors($form, errors);
+        }
+      });
+    } else {
+      showFormErrors($form, formErrors);
+    }
   },
   handleSubmitLoginForm: function (e) {
     e.preventDefault();
