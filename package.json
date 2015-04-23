@@ -13,6 +13,8 @@
   "scripts": {
     "start": "gulp",
     "test": "mocha -R spec -r ./util/jsdom.js --compilers js:babel/register src/**/*-test.js",
+    "coverage": "babel-istanbul --root=./src --include-babel-polyfill cover ./node_modules/mocha/bin/_mocha -- -R dot -r ./util/jsdom.js src/**/*-test.js",
+    "coverage:report": "npm run coverage && open coverage/lcov-report/index.html",
     "release": "gulp release",
     "release:beta": "gulp release --beta",
     "preinstall": "./util/deps",
@@ -55,6 +57,7 @@
   },
   "devDependencies": {
     "babel": "^5.1.11",
+    "babel-istanbul": "^0.1.2",
     "chai": "^2.2.0",
     "gulp": "^3.8.11",
     "gulp-babel": "^5.1.0",
@@ -70,7 +73,6 @@
     "gulp-shell": "^0.4.1",
     "gulp-sourcemaps": "^1.5.2",
     "gulp-util": "^3.0.4",
-    "isparta": "^3.0.3",
     "jest-cli": "kitematic/jest",
     "jsdom": "^5.0.1",
     "jsxhint": "^0.14.0",
