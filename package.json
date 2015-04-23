@@ -13,7 +13,7 @@
   "scripts": {
     "start": "gulp",
     "test": "mocha -R spec -r ./util/jsdom.js --compilers js:babel/register src/**/*-test.js",
-    "coverage": "babel-istanbul --root=./src --include-babel-polyfill cover ./node_modules/mocha/bin/_mocha -- -R dot -r ./util/jsdom.js src/**/*-test.js",
+    "coverage": "babel-istanbul --root=./src --include-babel-polyfill cover ./node_modules/mocha/bin/_mocha -- -R spec -r ./util/jsdom.js src/**/*-test.js",
     "coverage:report": "npm run coverage && open coverage/lcov-report/index.html",
     "release": "gulp release",
     "release:beta": "gulp release --beta",

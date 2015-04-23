@@ -19,12 +19,12 @@
   "strict": false,
   "quotmark": false,
   "nonbsp": true,
+  "jasmine": true,
   "noempty": true,
   "camelcase": false,
-  "jasmine": true,
   "globals": {
     "define": true,
     "pit": true
   },
-  "predef": [ "-Promise" ]
+  "predef": [ "-Promise", "-expect" ]
 }
