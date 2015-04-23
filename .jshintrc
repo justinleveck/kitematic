@@ -24,7 +24,6 @@
   "jasmine": true,
   "globals": {
     "define": true,
-    "jest": true,
     "pit": true
   },
   "predef": [ "-Promise" ]

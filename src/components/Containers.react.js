@@ -1,87 +1,50 @@
-var $ = require('jquery');
-var React = require('react/addons');
-var Router = require('react-router');
-var ContainerStore = require('../stores/ContainerStore');
-var ContainerList = require('./ContainerList.react');
-var Header = require('./Header.react');
-var ipc = require('ipc');
-var remote = require('remote');
-var metrics = require('../utils/MetricsUtil');
-var autoUpdater = remote.require('auto-updater');
-var RetinaImage = require('react-retina-image');
-var machine = require('../utils/DockerMachineUtil');
-var util = require('../utils/Util');
+import React from 'react';
+import Router from 'react-router';
+import containerStore from '../stores/ContainerStore';
+import ContainerList from './ContainerList.react';
+import Header from './Header.react';
+import ipc from 'ipc';
+import remote from 'remote';
+import metrics from '../utils/MetricsUtil';
+import RetinaImage from 'react-retina-image';
+import machine from '../utils/DockerMachineUtil';
+import shell from 'shell';
+import classNames from 'classnames';
 
-var Containers = React.createClass({
+export default React.createClass({
   contextTypes: {
     router: React.PropTypes.func
   },
-  getInitialState: function () {
-    return {
-      sidebarOffset: 0,
-      containers: ContainerStore.containers(),
-      sorted: ContainerStore.sorted(),
-      updateAvailable: false,
-      currentButtonLabel: '',
-      error: ContainerStore.error(),
-      downloading: ContainerStore.downloading()
-    };
-  },
-  componentDidMount: function () {
-    this.update();
-    ContainerStore.on(ContainerStore.SERVER_ERROR_EVENT, this.updateError);
-    ContainerStore.on(ContainerStore.SERVER_CONTAINER_EVENT, this.update);
-    ContainerStore.on(ContainerStore.CLIENT_CONTAINER_EVENT, this.updateFromClient);
 
-    if (this.state.sorted.length) {
-      this.context.router.transitionTo('containerHome', {name: this.state.sorted[0].Name});
-    }
+  getInitialState () {
+    return containerStore.getState();
+  },
+
+  componentDidMount () {
+    containerStore.listen(this.onChange);
 
     ipc.on('application:update-available', () => {
       this.setState({
         updateAvailable: true
       });
     });
-    autoUpdater.checkForUpdates();
+    remote.require('auto-updater').checkForUpdates();
   },
-  componentDidUnmount: function () {
-    ContainerStore.removeListener(ContainerStore.SERVER_CONTAINER_EVENT, this.update);
-    ContainerStore.removeListener(ContainerStore.CLIENT_CONTAINER_EVENT, this.updateFromClient);
+
+  componentWillUnmount() {
+    containerStore.unlisten(this.onChange);
   },
-  onDestroy: function () {
-    if (this.state.sorted.length) {
-      this.context.router.transitionTo('containerHome', {name: this.state.sorted[0].Name});
-    } else {
-      this.context.router.transitionTo('containers');
-    }
+
+  onChange () {
+    this.setState(containerStore.getState());
   },
+
   updateError: function (err) {
     this.setState({
       error: err
     });
   },
-  update: function (name, status) {
-    this.setState({
-      containers: ContainerStore.containers(),
-      sorted: ContainerStore.sorted(),
-      downloading: ContainerStore.downloading()
-    });
-    if (status === 'destroy') {
-      this.onDestroy();
-    }
-  },
-  updateFromClient: function (name, status) {
-    this.setState({
-      containers: ContainerStore.containers(),
-      sorted: ContainerStore.sorted(),
-      downloading: ContainerStore.downloading()
-    });
-    if (status === 'create') {
-      this.context.router.transitionTo('containerHome', {name: name});
-    } else if (status === 'destroy') {
-      this.onDestroy();
-    }
-  },
+
   handleScroll: function (e) {
     if (e.target.scrollTop > 0 && !this.state.sidebarOffset) {
       this.setState({
@@ -94,7 +57,6 @@ var Containers = React.createClass({
     }
   },
   handleNewContainer: function () {
-    $(this.getDOMNode()).find('.new-container-item').parent().fadeIn();
     this.context.router.transitionTo('new');
     metrics.track('Pressed New Container');
   },
@@ -103,22 +65,22 @@ var Containers = React.createClass({
     ipc.send('application:quit-install');
   },
   handleClickPreferences: function () {
+    this.context.router.transitionTo('preferences');
     metrics.track('Opened Preferences', {
       from: 'app'
     });
-    this.context.router.transitionTo('preferences');
   },
   handleClickDockerTerminal: function () {
+    machine.dockerTerminal();
     metrics.track('Opened Docker Terminal', {
       from: 'app'
     });
-    machine.dockerTerminal();
   },
   handleClickReportIssue: function () {
+    shell.openExternal('https://github.com/kitematic/kitematic/issues/new');
     metrics.track('Opened Issue Reporter', {
       from: 'app'
     });
-    util.exec(['open', 'https://github.com/kitematic/kitematic/issues/new']);
   },
   handleMouseEnterDockerTerminal: function () {
     this.setState({
@@ -151,10 +113,11 @@ var Containers = React.createClass({
     });
   },
   render: function () {
-    var sidebarHeaderClass = 'sidebar-header';
-    if (this.state.sidebarOffset) {
-      sidebarHeaderClass += ' sep';
-    }
+    var sidebarHeaderClass = classNames({
+      'sidebar-header': true,
+      'sep': this.state.sidebarOffset
+    });
+
     var updateWidget;
     if (this.state.updateAvailable) {
       updateWidget = (
@@ -175,7 +138,7 @@ var Containers = React.createClass({
               </div>
             </section>
             <section className="sidebar-containers" onScroll={this.handleScroll}>
-              <ContainerList downloading={this.state.downloading} containers={this.state.sorted} newContainer={this.state.newContainer} />
+              <ContainerList downloading={this.state.downloading} containers={this.state.containers} newContainer={this.state.newContainer} />
               <div className="sidebar-buttons">
                 <div className="btn-label">{this.state.currentButtonLabel}</div>
                 <span className="btn-sidebar" onClick={this.handleClickDockerTerminal} onMouseEnter={this.handleMouseEnterDockerTerminal} onMouseLeave={this.handleMouseLeaveDockerTerminal}><RetinaImage src="docker-terminal.png"/></span>
@@ -192,5 +155,3 @@ var Containers = React.createClass({
     );
   }
 });
-
-module.exports = Containers;

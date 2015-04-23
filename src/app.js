@@ -29,12 +29,7 @@ router.run(Handler => React.render(<Handler/>, document.body));
 
 SetupStore.setup().then(() => {
   Menu.setApplicationMenu(Menu.buildFromTemplate(template()));
-  ContainerStore.on(ContainerStore.SERVER_ERROR_EVENT, (err) => {
-    bugsnag.notify(err);
-  });
-  ContainerStore.init(function () {
-    router.transitionTo('containers');
-  });
+  router.transitionTo('containers');
 }).catch(err => {
   metrics.track('Setup Failed', {
     step: 'catch',

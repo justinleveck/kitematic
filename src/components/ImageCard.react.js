@@ -1,11 +1,12 @@
 var $ = require('jquery');
 var React = require('react/addons');
 var RetinaImage = require('react-retina-image');
-var ContainerStore = require('../stores/ContainerStore');
 var metrics = require('../utils/MetricsUtil');
 var OverlayTrigger = require('react-bootstrap').OverlayTrigger;
 var Tooltip = require('react-bootstrap').Tooltip;
 var util = require('../utils/Util');
+var imageActions = require('../actions/ImageActions');
+var containerStore = require('../stores/ContainerStore');
 
 var ImageCard = React.createClass({
   getInitialState: function () {
@@ -22,11 +23,10 @@ var ImageCard = React.createClass({
     $tagOverlay.fadeOut(300);
     metrics.track('Selected Image Tag');
   },
-  handleClick: function (name) {
+  handleClick: function (repo) {
     metrics.track('Created Container');
-    ContainerStore.create(name, this.state.chosenTag, function () {
-      $(document.body).find('.new-container-item').parent().fadeOut();
-    }.bind(this));
+    imageActions.run(repo, this.state.chosenTag, containerStore.generateName(repo));
+    $(document.body).find('.new-container-item').parent().fadeOut();
   },
   handleTagOverlayClick: function (name) {
     var $tagOverlay = $(this.getDOMNode()).find('.tag-overlay');
