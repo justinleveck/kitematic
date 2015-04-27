@@ -398,6 +398,29 @@ var ContainerStore = assign(Object.create(EventEmitter.prototype), {
       }
     });
   },
+  stop: function (name, callback) {
+    var container = docker.client().getContainer(name);
+    _muted[name] = true;
+    container.stop(err => {
+      if (err && err.statusCode !== 304) {
+        _muted[name] = false;
+        callback(err);
+      } else {
+        _muted[name] = false;
+        this.fetchContainer(name, callback);
+      }
+    });
+  },
+  start: function (name, callback) {
+    var container = docker.client().getContainer(name);
+    container.start(err => {
+      if (err && err.statusCode !== 304) {
+        callback(err);
+      } else {
+        this.fetchContainer(name, callback);
+      }
+    });
+  },
   remove: function (name, callback) {
     if (_placeholders[name]) {
       delete _placeholders[name];
